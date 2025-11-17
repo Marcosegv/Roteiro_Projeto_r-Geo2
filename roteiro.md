@@ -9,12 +9,10 @@ projeto/
  │    ├── POTCAR
  │    ├── KPOINTS
  │    ├── KPOINTS-bands
- │    ├── KPOINTS-dos
  │    ├── INCAR-opt_rede
  │    ├── INCAR-opt_completa
  │    ├── INCAR-bands_scf
  │    ├── INCAR-bands_nscf
- │    ├── INCAR-dos_nscf
  │    ├── INCAR-optics
  │    └──minushalf_potfiles/
  │        ├── POTCAR.ge
@@ -107,12 +105,16 @@ sbatch run.srm
 
 ## 2. DFT - 1/2
 
+Crie uma pasta para rodar o dft-1/2. Em seguida, é necessário preparar os arquivos abaixo:
+
 Arquivos necessários:
-- INCAR
-- KPOINTS
-- POSCAR
-- POTCAR
-- minushalf.yaml
+- `INCAR`
+- `KPOINTS`
+- `POSCAR`
+- `POTCAR`
+- `minushalf.yaml`
+- `minushalf_potfiles/POTCAR.ge`
+- `minushalf_potfiles/POTCAR.o`
 
 Arquivo `INCAR`:
 ```bash
