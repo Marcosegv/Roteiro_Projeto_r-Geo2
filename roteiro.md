@@ -1,5 +1,5 @@
 # Roteiro Projeto r-GeO2 - Parte I
-
+*** 
 ## 0. Organização geral do projeto
 Estrutura sugerida do diretório do projeto:
 ```bash
