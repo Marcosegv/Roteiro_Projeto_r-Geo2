@@ -16,7 +16,7 @@ projeto/
  │    ├── INCAR-bands_nscf
  │    ├── INCAR-dos_nscf
  │    ├── INCAR-optics
- │    └──1.POTCARS-DFT-0_5/
+ │    └──minushalf_potfiles/
  │        ├── POTCAR.ge
  │        └── POTCAR.o
  ├── LDA/
@@ -145,13 +145,22 @@ correction:
     correction_code: v
 ```
 
-Basta rodar:
+Basta rodar o script abaixo (`sbatch run-dft-1_2`):
 ```bash
-# Ativa o ambiente python do minushalf
+#!/bin/bash
+#SBATCH --job-name=minushalf
+#SBATCH --partition=local
+#SBATCH --nodes=1
+#SBATCH --ntasks=8
+#SBATCH --time=1-00:00:00
+
+export OMP_NUM_THREADS=1
+
+# Ativando o ambiente do minushalf
 conda activate minushalf_env
 
-# Executa o dft-1/2
-minushalf execute
+# Executa o minushalf (que internamente chama o VASP várias vezes)
+minushalf execute > minushalf.out 2>&1
 ```
 
 ## 3. Variação de volume (RASCUNHO)
@@ -399,6 +408,77 @@ plt.savefig(OUT_PNG, dpi=300)
 print(f"✅ Gráfico salvo como: {OUT_PNG}")
 plt.show()
 ```
+
+`4.run_relax_dos_bands.srm`
+```bash
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks=32
+#SBATCH -p par32
+#SBATCH -J deformation_potential
+
+echo "Nós alocados: $SLURM_JOB_NODELIST"
+cd $SLURM_SUBMIT_DIR
+echo "Diretório: $SLURM_SUBMIT_DIR"
+
+module load vasp/6.3.0
+
+VASP_CMD="mpirun -np $SLURM_NTASKS vasp_std"
+SIM_DIR="Simulations"
+ARQ_DIR="arquivos"
+
+for scale in ${SIM_DIR}/scale_*; do
+  echo ">>> Processando $scale"
+
+  # -----------------------------
+  # 1) RELAXAÇÃO
+  # -----------------------------
+  mkdir -p $scale/rlx
+  cp $scale/POSCAR $scale/rlx/
+  cp $scale/POTCAR $scale/rlx/
+  cp $ARQ_DIR/INCAR_rlx $scale/rlx/INCAR
+  cp $ARQ_DIR/KPOINTS $scale/rlx/
+
+  echo " • Relaxação..."
+  cd $scale/rlx
+    time $VASP_CMD > saida-rlx.out
+  cd - >/dev/null
+
+  # -----------------------------
+  # 2) DOS
+  # -----------------------------
+  mkdir -p $scale/dos
+  cp $scale/rlx/CONTCAR $scale/dos/POSCAR
+  cp $scale/POTCAR $scale/dos/
+  cp $ARQ_DIR/dos_INCAR $scale/dos/INCAR
+  cp $ARQ_DIR/dos_KPOINTS $scale/dos/KPOINTS
+
+  echo " • DOS..."
+  cd $scale/dos
+    time $VASP_CMD > saida-dos.out
+  cd - >/dev/null
+
+  # -----------------------------
+  # 3) BANDAS
+  # -----------------------------
+  mkdir -p $scale/bands
+  cp $scale/rlx/CONTCAR $scale/bands/POSCAR
+  cp $scale/POTCAR $scale/bands/
+  cp $ARQ_DIR/bands_INCAR $scale/bands/INCAR
+  cp $ARQ_DIR/KPOINTS_band $scale/bands/KPOINTS
+  cp $scale/dos/CHGCAR $scale/bands/
+
+  echo " • Bandas..."
+  cd $scale/bands
+    time $VASP_CMD > saida-bands.out
+  cd - >/dev/null
+
+done
+
+echo ">>> Todo o fluxo relaxação + DOS + bandas concluído!"
+```
+
+
 
 `5.extract_gap_plot_with_slope_and_strain_v3.py`:
 ```bash
