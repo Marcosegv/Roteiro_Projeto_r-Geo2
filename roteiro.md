@@ -169,9 +169,11 @@ minushalf execute > minushalf.out 2>&1
 Voltem para a pasta base do seu pseudopotencial e crie uma pasta chamada `Volume`:
 
 ```bash
-mkdir volume ; mkdir volume/dft
+mkdir -p volume ; mkdir -p volume/dft
 
 cd volume/dft
+
+mkdir -p arquivos
 ```
 
 Copie os arquivos necessários para a seguinte pasta:
