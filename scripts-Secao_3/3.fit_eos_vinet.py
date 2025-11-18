@@ -8,7 +8,7 @@ from lmfit import Model
 # -------------------- CONFIGURAÇÕES --------------------
 SIM_DIR = "Simulations_fit"
 OUT_PNG = "eos_fit_vinet_lmfit.png"
-POSCAR = "POSCAR"
+POSCAR = "arquivos/POSCAR"
 # ------------------------------------------------------
 
 # Modelo Vinet

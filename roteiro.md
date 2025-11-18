@@ -178,10 +178,11 @@ mkdir -p arquivos
 
 Copie os arquivos necessários para a seguinte pasta:
 ```bash
-cp ../2.optimize_completa/INCAR arquivos/INCAR_rlx
-cp ../2.optimize_completa/POSCAR arquivos/.
-cp ../2.optimize_completa/POTCAR arquivos/.
-cp ../2.optimize_completa/KPOINTS arquivos/.
+cp ../../2.optimize_completa/INCAR arquivos/INCAR_rlx
+cp ../../2.optimize_completa/POSCAR arquivos/.
+cp ../../2.optimize_completa/POTCAR arquivos/.
+cp ../../2.optimize_completa/KPOINTS arquivos/.
+cp ~/FF281-2025/Geo2-Projeto_Final/0.INPUTS_BASE/INCAR-bands* arquivos/.
 ```
 
 Crie o arquivo `INCAR` no diretório `arquivos` (ou seja, `arquivos/INCAR`):
@@ -227,8 +228,9 @@ LPLANE = .TRUE.
 ### 3.1. Fase de FIT (varredura ampla)
 Gerar inputs para o ajuste (em `Simulations_fit`)
 ```bash
+POSCAR=arquivos/POSCAR ARQUIVOS=arquivos \
 OUTDIR=Simulations_fit SCALES="$(seq 0.90 0.01 1.10)" \
-bash 1.generate_EOS_inputs.sh > saida-generate_EOS_fit.out
+bash 1.generate_EOS_inputs.sh
 ```
 
 Rodar EOS estático nos volumes do fit:
@@ -245,11 +247,12 @@ python 3.fit_eos_vinet.py > fit-EOS-Vinet.out
 ### 3.2. Fase fina (±1% ao redor de V0) → gaps/strain
 Gerar inputs para ±1% (em Simulations)
 ```bash
+POSCAR=arquivos/POSCAR ARQUIVOS=arquivos \
 OUTDIR=Simulations SCALES="0.9967 0.9983 1.0000 1.0017 1.0033" \
-bash 1.generate_EOS_inputs.sh > saida-generate_EOS_fine.out
+bash 1.generate_EOS_inputs.sh
 ```
 
-Relax interno + SCF + NSCF (bandas) nos volumes finos
+Relax interno + SCF + NSCF (bandas) nos volumes finos!
 ```bash
 sbatch --wait --export=ALL,SIM_DIR=Simulations 4.run_relax_scf_nscf_bands.srm
 ```

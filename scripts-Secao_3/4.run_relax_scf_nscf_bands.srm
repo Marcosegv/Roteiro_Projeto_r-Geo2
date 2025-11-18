@@ -35,8 +35,8 @@ for scale in ${SIM_DIR}/scale_*; do
 
   ( cd "$scale/bands" \
     && echo " • SCF..." \
-    && cp ../../"$ARQ_DIR"/bands_INCAR_scf INCAR \
-    && cp ../../"$ARQ_DIR"/KPOINTS_scf     KPOINTS \
+    && cp ../../../"$ARQ_DIR"/INCAR-bands_scf INCAR \
+    && cp ../../../"$ARQ_DIR"/KPOINTS     KPOINTS \
     && time $VASP_CMD > scf.out \
     && mv WAVECAR WAVECAR_scf \
     && mv CHGCAR  CHGCAR_scf )
@@ -44,12 +44,11 @@ for scale in ${SIM_DIR}/scale_*; do
   # 3) NSCF (bandas) na mesma pasta
   ( cd "$scale/bands" \
     && echo " • NSCF (bandas)..." \
-    && cp ../../"$ARQ_DIR"/bands_INCAR_nscf INCAR \
-    && cp ../../"$ARQ_DIR"/KPOINTS_bands    KPOINTS \
+    && cp ../../../"$ARQ_DIR"/INCAR-bands_nscf INCAR \
+    && cp ../../../"$ARQ_DIR"/KPOINTS_bands    KPOINTS \
     && ln -sf CHGCAR_scf CHGCAR \
     && ln -sf WAVECAR_scf WAVECAR \
     && time $VASP_CMD > bands.out )
 done
 
 echo "[OK] relax + SCF + NSCF concluído em: $SIM_DIR"
-
