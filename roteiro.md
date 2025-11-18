@@ -184,10 +184,10 @@ cp ../2.optimize_completa/KPOINTS arquivos/.
 
 Crie o arquivo `INCAR` no diretório `arquivos` (ou seja, `arquivos/INCAR`):
 ```bash
-SYSTEM = CsPbI3_cub
+SYSTEM = r-GeO2
 
 Electronic relaxation:
-ENCUT   = 500.000   ! Cutoff energy
+ENCUT   = 520.000   ! Cutoff energy
 ALGO    = Normal
 NELMIN  = 6
 NELM    = 80
