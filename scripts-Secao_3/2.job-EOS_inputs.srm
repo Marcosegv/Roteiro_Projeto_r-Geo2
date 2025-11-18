@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --job-name=vasp      # Escolha um nome para o Job!
+#SBATCH --partition=local    # Nome da fila
+#SBATCH --nodes=1            # nó einstein
+#SBATCH --ntasks=8           # 8 processos MPI; se quiser rodar com menos cores altere aqui!
+#SBATCH --time=7-00:00:00    # Tempo limite do cálculo rodando, opcional!
+
+echo "Nós alocados: $SLURM_JOB_NODELIST"
+echo "CPUs: $SLURM_NTASKS"
+
+cd "$SLURM_SUBMIT_DIR"
+echo "Diretório: $SLURM_SUBMIT_DIR"
+
+VASP_CMD="mpirun -np $SLURM_NTASKS vasp.6.5.1_std"
+SIM_DIR="${SIM_DIR:-Simulations}"   # <- pode sobrescrever via --export
+
+scale_dirs=( $(ls -1d "$SIM_DIR"/scale_* 2>/dev/null | sort -V) )
+
+for dir in "${scale_dirs[@]}"; do
+  echo ">>> VASP em: $dir"
+  ( cd "$dir" && time $VASP_CMD > saida-EOS_inputs.out ) || echo "Erro em $dir"
+done
+
+echo "[OK] EOS concluído em: $SIM_DIR"

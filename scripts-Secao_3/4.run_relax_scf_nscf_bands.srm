@@ -1,0 +1,55 @@
+#!/bin/bash
+#SBATCH --job-name=vasp      # Escolha um nome para o Job!
+#SBATCH --partition=local    # Nome da fila
+#SBATCH --nodes=1            # nó einstein
+#SBATCH --ntasks=8           # 8 processos MPI; se quiser rodar com menos cores altere aqui!
+#SBATCH --time=7-00:00:00    # Tempo limite do cálculo rodando, opcional!
+
+export OMP_NUM_THREADS=1
+
+echo "Nós alocados: $SLURM_JOB_NODELIST"
+cd "$SLURM_SUBMIT_DIR"
+echo "Diretório: $SLURM_SUBMIT_DIR"
+
+VASP_CMD="mpirun -np $SLURM_NTASKS vasp.6.5.1_std"
+
+SIM_DIR="${SIM_DIR:-Simulations}"   # <- pasta "fina"
+ARQ_DIR="${ARQ_DIR:-arquivos}"
+
+for scale in ${SIM_DIR}/scale_*; do
+  echo ">>> Processando $scale"
+
+  # 1) RELAX interno (ISIF=2), volume/shape fixos do POSCAR
+  mkdir -p "$scale/rlx"
+  cp "$scale/POSCAR"    "$scale/rlx/"
+  cp "$scale/POTCAR"    "$scale/rlx/"
+  cp "$ARQ_DIR/INCAR_rlx" "$scale/rlx/INCAR"
+  cp "$ARQ_DIR/KPOINTS" "$scale/rlx/"
+
+  ( cd "$scale/rlx" && echo " • Relax..." && time $VASP_CMD > saida-rlx.out )
+
+  # 2) SCF (band-edges)
+  mkdir -p "$scale/bands"
+  cp "$scale/rlx/CONTCAR" "$scale/bands/POSCAR"
+  cp "$scale/POTCAR"      "$scale/bands/"
+
+  ( cd "$scale/bands" \
+    && echo " • SCF..." \
+    && cp ../../"$ARQ_DIR"/bands_INCAR_scf INCAR \
+    && cp ../../"$ARQ_DIR"/KPOINTS_scf     KPOINTS \
+    && time $VASP_CMD > scf.out \
+    && mv WAVECAR WAVECAR_scf \
+    && mv CHGCAR  CHGCAR_scf )
+
+  # 3) NSCF (bandas) na mesma pasta
+  ( cd "$scale/bands" \
+    && echo " • NSCF (bandas)..." \
+    && cp ../../"$ARQ_DIR"/bands_INCAR_nscf INCAR \
+    && cp ../../"$ARQ_DIR"/KPOINTS_bands    KPOINTS \
+    && ln -sf CHGCAR_scf CHGCAR \
+    && ln -sf WAVECAR_scf WAVECAR \
+    && time $VASP_CMD > bands.out )
+done
+
+echo "[OK] relax + SCF + NSCF concluído em: $SIM_DIR"
+
