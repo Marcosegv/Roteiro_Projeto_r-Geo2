@@ -193,7 +193,7 @@ Na prática, procedemos em duas etapas complementares:
 
 > Observação: usar o **$V_0$ do fit** como referência de $\varepsilon$ garante consistência entre os pontos (mesmos parâmetros eletrônicos) e evita misturar efeitos de relaxações geométricas na definição de deformação.
 
-### 3.1 Rodando
+### 3.1 Preparando os arquivos necessários
 
 Voltem para a pasta base do seu pseudopotencial e crie uma pasta chamada `Volume`:
 
@@ -214,6 +214,8 @@ cp ../../2.optimize_completa/KPOINTS arquivos/.
 cp ~/FF281-2025/Geo2-Projeto_Final/0.INPUTS_BASE/INCAR-bands* arquivos/.
 cp ~/FF281-2025/Geo2-Projeto_Final/0.INPUTS_BASE/KPOINTS_bands arquivos/.
 ```
+
+** Atenção: No arquivo `INCAR_rlx`, mude de `ISIF = 3` para `ISIF = 2`. 
 
 Crie o arquivo `INCAR` no diretório `arquivos` (ou seja, `arquivos/INCAR`):
 ```bash
@@ -255,7 +257,7 @@ LPLANE = .TRUE.
 
 **Atenção: É importante copiar todos os scripts que estão em anexo (pasta: `scripts-Secao_3`) para o diretório atual. Pode-se também deixar em outra pasta e digitar todo o caminho, no entanto, caso não tenha experiencia com script bash, recomendo não fazer.**
 
-### 3.1. Fase de FIT (varredura ampla)
+### 3.2. Fase de FIT (varredura ampla)
 Gerar inputs para o ajuste (em `Simulations_fit`)
 ```bash
 POSCAR=arquivos/POSCAR ARQUIVOS=arquivos \
@@ -265,7 +267,7 @@ bash 1.generate_EOS_inputs.sh
 
 Rodar EOS estático nos volumes do fit:
 ```bash
-sbatch --wait --export=ALL,SIM_DIR=Simulations_fit 2.job-EOS_inputs.srm
+sbatch --export=ALL,SIM_DIR=Simulations_fit 2.job-EOS_inputs.srm
 ```
 
 Ajustar Vinet e plotar:
@@ -274,7 +276,7 @@ python 3.fit_eos_vinet.py > fit-EOS-Vinet.out
 ```
 
 
-### 3.2. Fase fina (±1% ao redor de V0) → gaps/strain
+### 3.3. Fase fina (±1% ao redor de V0) → gaps/strain
 Gerar inputs para ±1% (em Simulations)
 ```bash
 POSCAR=arquivos/POSCAR ARQUIVOS=arquivos \
@@ -284,7 +286,7 @@ bash 1.generate_EOS_inputs.sh
 
 Relax interno + SCF + NSCF (bandas) nos volumes finos!
 ```bash
-sbatch --wait --export=ALL,SIM_DIR=Simulations 4.run_relax_scf_nscf_bands.srm
+sbatch --export=ALL,SIM_DIR=Simulations 4.run_relax_scf_nscf_bands.srm
 ```
 
 Extrair gaps vs V e vs strain:
