@@ -165,7 +165,34 @@ conda activate minushalf_env
 minushalf execute > minushalf.out 2>&1
 ```
 
-## 3. Variação de volume
+## 3. Variação de volume e potencial de deformação (strain)
+
+### 3.0 Objetivo físico
+
+Buscamos duas coisas:
+
+1. **Ajustar a Equação de Estado (EoS)** para obter o **volume de equilíbrio** \(V_0\), o **módulo volumétrico** \(B_0\) e sua derivada \(B'\) a partir da curva de energia total \(E(V)\).
+2. **Medir o potencial de deformação do gap**, isto é, como a **largura do gap** \(E_g\) varia com a **deformação volumétrica** \(\varepsilon\) nas vizinhanças do equilíbrio.
+
+Definimos a deformação volumétrica em torno do volume de equilíbrio como
+$$
+\varepsilon \equiv \frac{V - V_0}{V_0},
+$$
+e o **potencial de deformação do gap** como a derivada de \(E_g\) em relação à deformação no ponto de equilíbrio:
+$$
+\Xi \;\equiv\; \left.\frac{dE_g}{d\varepsilon}\right|_{\varepsilon=0}.
+$$
+
+Na prática, procedemos em duas etapas complementares:
+
+- **(i) Fit amplo de \(E(V)\)** usando uma EoS (neste projeto, **Vinet**) com cálculos **estáticos a volume fixo** (NSW=0, ISIF=2). Dessa etapa obtemos \(V_0\), \(B_0\) e \(B'\).
+- **(ii) Varredura fina ao redor de \(V_0\)** (tipicamente \(\pm 1\%\) em volume) para extrair \(E_g(\varepsilon)\). Fazemos **relax iônico a volume fixo** (ISIF=2, NSW>0) e depois **SCF + NSCF de bandas** para cada volume. Ajustamos uma reta a \(E_g(\varepsilon)\) e o coeficiente angular fornece \(\Xi\).
+
+> Observação: usar o **\(V_0\) do fit** como referência de \(\varepsilon\) garante consistência entre os pontos (mesmos parâmetros eletrônicos) e evita misturar efeitos de relaxações geométricas na definição de deformação.
+
+
+### 3.1 Rodando
+
 Voltem para a pasta base do seu pseudopotencial e crie uma pasta chamada `Volume`:
 
 ```bash
@@ -183,6 +210,7 @@ cp ../../2.optimize_completa/POSCAR arquivos/.
 cp ../../2.optimize_completa/POTCAR arquivos/.
 cp ../../2.optimize_completa/KPOINTS arquivos/.
 cp ~/FF281-2025/Geo2-Projeto_Final/0.INPUTS_BASE/INCAR-bands* arquivos/.
+cp ~/FF281-2025/Geo2-Projeto_Final/0.INPUTS_BASE/KPOINTS_bands arquivos/.
 ```
 
 Crie o arquivo `INCAR` no diretório `arquivos` (ou seja, `arquivos/INCAR`):
