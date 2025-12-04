@@ -1,4 +1,4 @@
-# Roteiro Projeto r-GeO2 - Parte I
+# Roteiro Projeto r-GeO2
 *** 
 ## 0. Organização geral do projeto
 Estrutura sugerida do diretório do projeto:
@@ -294,4 +294,55 @@ Extrair gaps vs V e vs strain:
 python 5.extract_gap_plot_with_slope_and_strain_v3.py > saida-slope_and_strain.out
 ```
 
-Agora, volte para a pasta volume. Crie um diretório para `dft-1_2` e repita toda a seção 3. **Lembre-se de pegar o POTCAR do dft-1/2!!!**
+Agora, volte para a pasta volume. Crie um diretório para `dft-1_2` e repita toda a seção 3.3. **Lembre-se de pegar o POTCAR do dft-1/2!!!**
+
+## 4. Varredura anisotrópica \(a,c\) e propriedades eletrônicas
+
+Nesta etapa, vamos usar o resultado “melhor” da Seção 3 (volume de referência) para:
+1. Fazer uma **varredura em \(a\)** (parâmetro in-plane), e para cada \(a\),  
+2. Fazer uma **varredura em \(c\)** (via `c_scan.sh`) para achar o \(c^\*\) que minimiza a energia,  
+3. Calcular **bandas + DOS** no ponto \((a, c^\*)\).  
+
+Tudo isso já está automatizado nos scripts `1.run.sh` e `c_scan.sh`.
+
+### 4.1 Preparar a pasta e os arquivos de base
+
+Na pasta do funcional (por exemplo, `LDA/`):
+
+```bash
+cd /home/ff281/FF281-2025/Geo2-Projeto_Final/LDA
+
+mkdir -p secao_4
+cd secao_4
+
+# Copiar os scripts prontos
+cp ~/FF281-2025/Fisica_Materia_Condensada-FF281/scripts-secao_4/1.run.sh .
+cp ~/FF281-2025/Fisica_Materia_Condensada-FF281/scripts-secao_4/c_scan.sh .
+
+chmod +x 1.run.sh c_scan.sh
+
+# Pasta de arquivos de entrada de referência
+mkdir -p BASE_FILES
+```
+
+Agora é fundamental montar corretamente a pasta `BASE_FILES/` usando os melhores resultados da seção anterior (Seção 3 – variação de volume / V₀, bandas e DOS):
+
+```bash
+BASE_FILES/
+ ├── POSCAR
+ ├── POTCAR
+ ├── INCAR           
+ ├── KPOINTS      
+ ├── 2.INCAR-bands_SCF
+ ├── 2.KPOINTS-bands_NSCF
+ ├── 3.INCAR-bands_NSCF
+ ├── 3.KPOINTS-dos
+ └── 4.INCAR-dos
+```
+
+## 4.2 Rodar a varredura a,c e as propriedades
+Rode o comando com
+
+```bash
+sbatch 1.run.sh
+```
